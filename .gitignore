@@ -1,0 +1,5 @@
+.gitignore
+main
+lex.yy.c
+yacc.tab.*
+*.o
