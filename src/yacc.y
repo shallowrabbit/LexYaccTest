@@ -17,29 +17,18 @@ char* str;
 %token<num> INTEGER
 %token<str> IDENTIFIER
 
+%type<str> identifier
+
 %%
 
-file:
-    tokenlist
-    {
-        cout << "all id:" << $1 << endl;
-    };
-    tokenlist:
+expression : identifier
     {
     }
-    | tokenlist INTEGER
+    | expression PLUS expression
     {
-        cout << "int: " << $2 << endl;
     }
-    | tokenlist IDENTIFIER
-    {
-        $$ += " " + $2;
-        cout << "id: " << $2 << endl;
-    }
-    | tokenlist OPERATOR
-    {
-        cout << "op: " << $2 << endl;
-    };
+
+identifier : IDENTIFIER
 
 %%  
 
