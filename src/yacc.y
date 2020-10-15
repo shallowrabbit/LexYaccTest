@@ -9,11 +9,13 @@ extern "C"
 
 %}
 
-%token<m_nInt>INTEGER
-%token<m_sId>IDENTIFIER
-%token<m_cOp>OPERATOR
-%type<m_sId>file
-%type<m_sId>tokenlist
+%union {
+int num;
+char* str;
+}
+
+%token<num> INTEGER
+%token<str> IDENTIFIER
 
 %%
 
@@ -41,27 +43,30 @@ file:
 
 %%  
 
-void yyerror(const char *s)
+void yyerror(const char *msg)
 {
-    cerr << s << endl;
+    cerr << msg << endl;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    const char* sFile = "examples/file.txt";
-    FILE* fp = fopen(sFile, "r");
-    if (fp == nullptr) {
-        printf("cannot open %s\n", sFile);
-        return -1;
+    if (argc < 2) {
+        printf("No input file!\n");
     }
-    extern FILE* yyin;
-    yyin = fp;
+    for (auto i = 1; i < argc; i++) {
+        FILE* fp = fopen(argv[i], "r");
+        if (fp == nullptr) {
+            printf("cannot open %s\n", sFile);
+            return -1;
+        }
+        extern FILE* yyin;
+        yyin = fp;
 
-    printf("-----begin parsing %s\n", sFile);
-    yyparse();
-    printf("-----end parsing\n");
+        printf("-----begin parsing %s\n", argv[i]);
+        yyparse();
+        printf("-----end parsing\n");
 
-    fclose(fp);
-
+        fclose(fp);
+    }
     return 0;
 }

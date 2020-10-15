@@ -1,15 +1,18 @@
 %{
+// c code inside %{ %} will be copied
 #include "main.h"
 #include "yacc.tab.h"
 
 extern "C"
 {
+    // yywrap will be called afer yylex()
     int yywrap(void);  
+    // yylex is lexical analysis entrance
     int yylex(void);
 }  
 %}  
 
-%x COMMENT  
+%x COMMENT LINECOMMENT
 
 nondigit    ([_A-Za-z])
 digit       ([0-9])
@@ -17,38 +20,36 @@ integer     ({digit}+)
 identifier  ({nondigit}({nondigit}|{digit})*)
 whitespace  ([ \f\r\t\v]+)
 newline     (\n)
-comment     (\/\/)
 
 %% 
 
+"//"            { BEGIN LINE_COMMENT; }  
+
+<LINE_COMMENT>{
+\n              { BEGIN INITIAL; }
+.               {}
+}
+
+
+"/*"            { BEGIN COMMENT; }  
+
+<COMMENT>{
+"*/"            { BEGIN INITIAL; }  
+.               {}
+"\n"            { yylineno++; }
+}
+
 {identifier}    {
-                    yylval.m_sId = yytext;
+                    yylval.str = strdup(yytext);
                     return IDENTIFIER;
                 }
 
 {integer}       {
-                    yylval.m_nInt = atoi(yytext);
+                    yylval.num = atoi(yytext);
                     return INTEGER;
                 }
 
 {whitespace}    {}  
-
-{newline}       {}  
-{comment}       {
-                    cout << "(comment)" << endl;
-                    BEGIN COMMENT;
-                }  
-
-.               {
-                    yylval.m_cOp = yytext[0];
-                    return OPERATOR;
-                }  
-
-<COMMENT>\n     {
-                    BEGIN INITIAL;
-                }  
-
-<COMMENT>.      {}  
 
 %%  
 
